@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide to APIs & Modern JavaScript</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: "Warm Harmony" - A palette of warm neutrals (bg-stone-50, bg-stone-100), with a complementary slate for text and UI elements (slate-700, slate-800), and a subtle, muted teal (teal-600, teal-700) for accents and interactive highlights. -->
+    <!-- Application Structure Plan: The SPA is designed as a multi-section, tab-based learning path. This structure was chosen over a linear scroll to allow users to freely explore topics based on their interest and experience level, promoting non-linear learning. The main navigation divides the content into three core pillars: "API Roadmap," "JS Asynchronous," and "JS State Management." Each pillar has its own sub-navigation to drill down into specific concepts. This thematic grouping makes the vast amount of information digestible. Key interactions include tab switching to load content dynamically, interactive charts to compare concepts visually, and clickable diagrams to reveal detailed information, fostering an exploratory and engaging user flow. -->
+    <!-- Visualization & Content Choices: 
+        - API Architectures: Report Info -> Comparison of REST, SOAP, GraphQL, etc. -> Goal: Compare -> Viz: Interactive Bar Chart (Chart.js) -> Interaction: Hover to see details on complexity/performance -> Justification: A bar chart provides a quick, visual comparison of abstract concepts. Library: Chart.js.
+        - JS Event Loop: Report Info -> Explanation of Call Stack, Queues -> Goal: Organize/Inform -> Viz: HTML/CSS/JS animated diagram -> Interaction: A "Run" button triggers an animation simulating the flow of tasks between the stack and queues -> Justification: A dynamic diagram is far more effective at explaining this process than static text. Method: Custom JS with Tailwind CSS.
+        - State Management Libraries: Report Info -> Comparison of Redux, MobX, Zustand, etc. -> Goal: Compare -> Viz: Interactive feature comparison table -> Interaction: Clicking on a library name highlights its column and displays a detailed summary -> Justification: A table allows for direct, feature-by-feature comparison, and the interaction provides deeper context on demand. Method: HTML/CSS/JS.
+        - Core Concepts: Report Info -> Definitions, explanations -> Goal: Inform -> Viz: Accordion-style text blocks -> Interaction: Clicking a topic expands to show the explanation -> Justification: Accordions keep the UI clean and allow users to focus on one concept at a time. Method: HTML/CSS/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        .nav-btn {
+            transition: all 0.3s ease;
+        }
+        .nav-btn.active {
+            background-color: #0d9488; /* teal-600 */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .sub-nav-btn.active {
+            background-color: #f1f5f9; /* slate-100 */
+            color: #0d9488; /* teal-600 */
+            font-weight: 600;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .event-loop-item {
+            transition: all 0.5s ease-in-out;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900">The Interactive Guide to APIs & Modern JavaScript</h1>
+            <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">An integrated learning experience combining the full API development roadmap with a deep dive into JavaScript's asynchronous features and state management.</p>
+        </header>
+
+        <nav class="flex justify-center mb-8 bg-white p-2 rounded-xl shadow-sm">
+            <button id="nav-api" class="nav-btn active text-slate-700 font-semibold py-2 px-4 rounded-lg" data-target="api-content">API Roadmap</button>
+            <button id="nav-async" class="nav-btn text-slate-700 font-semibold py-2 px-4 rounded-lg ml-2" data-target="async-content">JS Asynchronous</button>
+            <button id="nav-state" class="nav-btn text-slate-700 font-semibold py-2 px-4 rounded-lg ml-2" data-target="state-content">JS State Management</button>
+        </nav>
+
+        <main id="main-content">
+            <!-- API Roadmap Content -->
+            <section id="api-content" class="content-section active">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <aside class="md:col-span-1 bg-white p-4 rounded-xl shadow-sm">
+                        <h3 class="font-bold text-lg mb-4 text-slate-900">Topics</h3>
+                        <ul class="space-y-2" id="api-sub-nav">
+                            <li><button class="sub-nav-btn w-full text-left p-2 rounded-md active" data-target="api-fundamentals">Fundamentals</button></li>
+                            <li><button class="sub-nav-btn w-full text-left p-2 rounded-md" data-target="api-types">Architectures</button></li>
+                            <li><button class="sub-nav-btn w-full text-left p-2 rounded-md" data-target="api-design">Design</button></li>
+                            <li><button class="sub-nav-btn w-full text-left p-2 rounded-md" data-target="api-security">Security</button></li>
+                            <li><button class="sub-nav-btn w-full text-left p-2 rounded-md" data-target="api-testing">Testing & Quality</button></li>
+                        </ul>
+                    </aside>
+                    <div class="md:col-span-3 bg-white p-6 rounded-xl shadow-sm">
+                        <div id="api-fundamentals" class="api-sub-content active">
+                            <h2 class="text-3xl font-bold mb-4 text-slate-900">API Fundamentals</h2>
+                            <p class="mb-6 text-slate-600">This section covers the essential building blocks of any API. Understanding these core concepts is the first step toward designing, consuming, or discussing APIs effectively.</p>
+                            <div class="space-y-4">
+                                <div class="p-4 border rounded-lg">
+                                    <h4 class="font-semibold text-lg">What is an API?</h4>
+                                    <p class="text-slate-600 mt-1">An API (Application Programming Interface) is a set of rules that allows different software applications to communicate with each other. The classic analogy is a waiter in a restaurant: you (the client) tell the waiter (the API) what you want, and the waiter communicates with the kitchen (the server) to get your order. The API abstracts the complexity of the server, providing a clear contract for interaction.</p>
+                                </div>
+                                <div class="p-4 border rounded-lg">
+                                    <h4 class="font-semibold text-lg">HTTP Methods & Data Formats</h4>
+                                    <p class="text-slate-600 mt-1">APIs use HTTP methods (verbs) to indicate actions: <span class="font-mono bg-slate-100 p-1 rounded">GET</span> to retrieve data, <span class="font-mono bg-slate-100 p-1 rounded">POST</span> to create, <span class="font-mono bg-slate-100 p-1 rounded">PUT</span>/ <span class="font-mono bg-slate-100 p-1 rounded">PATCH</span> to update, and <span class="font-mono bg-slate-100 p-1 rounded">DELETE</span> to remove. Data is typically exchanged in formats like JSON (lightweight, JavaScript-friendly) or XML (more verbose, strict schema support).</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="api-types" class="api-sub-content hidden">
+                            <h2 class="text-3xl font-bold mb-4 text-slate-900">API Architectures Compared</h2>
+                            <p class="mb-6 text-slate-600">Different problems require different tools. This visualization compares major API architectures based on common developer considerations. Hover over the bars to see a brief summary of each style's strengths and ideal use cases.</p>
+                             <div class="chart-container">
+                                <canvas id="apiTypesChart"></canvas>
+                            </div>
+                        </div>
+                        <div id="api-design" class="api-sub-content hidden">
+                            <h2 class="text-3xl font-bold mb-4 text-slate-900">API Design Principles</h2>
+                             <p class="mb-6 text-slate-600">Good API design is an art. It focuses on creating interfaces that are intuitive, predictable, and easy for developers to use. This section highlights key principles like versioning and error handling.</p>
+                             <div class="space-y-4">
+                                <div class="p-4 border rounded-lg">
+                                    <h4 class="font-semibold text-lg">RESTful URI Design</h4>
+                                    <p class="text-slate-600 mt-1">Design URIs using plural nouns for resources (e.g., `/users`), not verbs. Maintain a logical hierarchy (e.g., `/users/{id}/orders`). Use lowercase letters and hyphens for readability. Avoid special characters and "chatty APIs" that require multiple requests for related data. HATEOAS (Hypermedia as the Engine of Application State) can be used to expose relationships via links in responses, decoupling client and server.</p>
+                                </div>
+                                <div class="p-4 border rounded-lg">
+                                    <h4 class="font-semibold text-lg">CRUD Operations Mapping (POST, PUT, PATCH)</h4>
+                                    <p class="text-slate-600 mt-1">Use <span class="font-mono bg-slate-100 p-1 rounded">POST</span> to create new resources (not idempotent). Use <span class="font-mono bg-slate-100 p-1 rounded">PUT</span> to fully replace an existing resource (idempotent; sends complete object). Use <span class="font-mono bg-slate-100 p-1 rounded">PATCH</span> to partially update an existing resource (not idempotent; sends only changed fields). Understanding these distinctions prevents unintended side effects and data inconsistencies.</p>
+                                </div>
+                                <div class="p-4 border rounded-lg">
+                                    <h4 class="font-semibold text-lg">Idempotency and Safety</h4>
+                                    <p class="text-slate-600 mt-1"><span class="font-bold">Idempotent</span> operations produce the same result if performed multiple times (e.g., GET, PUT, DELETE). <span class="font-bold">Safe</span> methods cause no side effects (e.g., GET, HEAD, OPTIONS). All safe methods are idempotent, but not all idempotent methods are safe. This is crucial for reliable retries and consistent server state.</p>
+                                </div>
+                                <div class="p-4 border rounded-lg">
+                                    <h4 class="font-semibold text-lg">Pagination Strategies: Offset vs. Cursor-based</h4>
+                                    <p class="text-slate-600 mt-1"><span class="font-bold">Offset pagination</span> (limit/offset) is simple but can be inefficient for large, dynamic datasets. <span class="font-bold">Cursor-based pagination</span> (using a pointer to the last item) is more scalable and consistent for large or changing data, but does not allow direct jumping to specific page numbers. Choose based on dataset size and navigation needs.</p>
+                                </div>
+                                <div class="p-4 border rounded-lg">
+                                    <h4 class="font-semibold text-lg">Filtering, Sorting, Searching</h4>
+                                    <p class="text-slate-600 mt-1">Implement these using URL query parameters. For filtering, use simple key-value pairs (e.g., `?status=active`), or structured parameters for complex conditions (`?price[gte]=10`). For sorting, use a `sort` parameter (e.g., `?sort=name,price:desc`). A `q` parameter can be used for general search queries. Balance flexibility with performance, especially for large datasets.</p>
+                                </div>
+                                <div class="p-4 border rounded-lg">
+                                    <h4 class="font-semibold text-lg">Structured Error Handling (RFC 7807)</h4>
+                                    <p class="text-slate-600 mt-1">Clear errors save developers hours of debugging. Instead of vague error messages, use a standard like RFC 7807 to provide structured problem details. This includes a `type` (URI to docs), `title`, `status` (HTTP code), and `detail` specific to the problem, making errors machine-readable and actionable.</p>
+                                </div>
+                                <div class="p-4 border rounded-lg">
+                                    <h4 class="font-semibold text-lg">Versioning Strategies</h4>
+                                    <p class="text-slate-600 mt-1">To evolve an API without breaking existing clients, versioning is essential. Common strategies include URI versioning (e.g., `/v1/users`), header versioning (`Api-Version: 2`), and media type versioning (`Accept: application/vnd.example.v1+json`). URI versioning is explicit and common, while header versioning keeps URLs cleaner.</p>
+                                </div>
+                                <div class="p-4 border rounded-lg">
+                                    <h4 class="font-semibold text-lg">API-First Design (OpenAPI/Swagger)</h4>
+                                    <p class="text-slate-600 mt-1">Prioritize API design before any other project aspect, using a clear API contract (e.g., OpenAPI Specification). This fosters better collaboration, faster development by allowing parallel work, and improved flexibility. It establishes the API spec as the "single source of truth."</p>
+                                </div>
+                                <div class="p-4 border rounded-lg">
+                                    <h4 class="font-semibold text-lg">Schema Design: JSON Schema & Protocol Buffers</h4>
+                                    <p class="text-slate-600 mt-1"><span class="font-bold">JSON Schema</span> validates JSON documents, maintaining human readability; ideal for web APIs where data integrity is key. <span class="font-bold">Protocol Buffers (Protobuf)</span> defines schemas in a binary format, offering superior performance and compactness for machine-to-machine communication, especially with gRPC. Choose based on readability vs. performance needs.</p>
+                                </div>
+                                <div class="p-4 border rounded-lg">
+                                    <h4 class="font-semibold text-lg">Backend-for-Frontend (BFF) Pattern</h4>
+                                    <p class="text-slate-600 mt-1">Create a dedicated backend service for each distinct frontend (e.g., web, mobile). This allows for tailored APIs that optimize performance, simplify client-side logic by offloading data aggregation/transformation, and enable independent frontend evolution. Ideal for complex multi-client applications.</p>
+                                </div>
+                                <div class="p-4 border rounded-lg">
+                                    <h4 class="font-semibold text-lg">Domain-Driven Design (DDD) for APIs</h4>
+                                    <p class="text-slate-600 mt-1">Focus on deeply understanding the core business domain and modeling the API to reflect it accurately. Use a <span class="font-bold">Ubiquitous Language</span> (shared vocabulary) and define <span class="font-bold">Bounded Contexts</span> (subdomains). This leads to APIs that expose richer business capabilities, improve communication, and enhance scalability, especially in microservices architectures.</p>
+                                </div>
+                             </div>
+                        </div>
+                         <div id="api-security" class="api-sub-content hidden">
+                            <h2 class="text-3xl font-bold mb-4 text-slate-900">Essential API Security</h2>
+                             <p class="mb-6 text-slate-600">Securing an API is not optional. It involves multiple layers, from identifying who is making a request to what they are allowed to do. This section covers the foundational concepts of API security.</p>
+                             <div class="p-4 border rounded-lg">
+                                <h4 class="font-semibold text-lg">Authentication vs. Authorization</h4>
+                                <p class="text-slate-600 mt-1"><span class="font-bold">Authentication</span> is about verifying identity ("Who are you?"). This is done via API Keys, OAuth 2.0, JWTs, etc. <span class="font-bold">Authorization</span> happens after authentication and determines permissions ("What are you allowed to do?"). OAuth 2.0 is a framework for delegated authorization, while OpenID Connect (OIDC) builds on it to add a user identity layer.</p>
+                            </div>
+                        </div>
+                         <div id="api-testing" class="api-sub-content hidden">
+                            <h2 class="text-3xl font-bold mb-4 text-slate-900">Testing & Quality Assurance</h2>
+                             <p class="mb-6 text-slate-600">A robust testing strategy ensures your API is reliable, performant, and secure. It ranges from manual checks to sophisticated automated testing that simulates real-world conditions.</p>
+                             <div class="p-4 border rounded-lg">
+                                <h4 class="font-semibold text-lg">Testing Pyramid</h4>
+                                <p class="text-slate-600 mt-1">A balanced approach includes: <span class="font-bold">Unit Tests</span> to check individual functions, <span class="font-bold">Integration Tests</span> to verify components work together, and <span class="font-bold">End-to-End (E2E) Tests</span> to validate full user flows. <span class="font-bold">Contract Testing</span> (e.g., with Pact) ensures that client and server expectations remain aligned, preventing integration failures.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- JS Asynchronous Content -->
+            <section id="async-content" class="content-section">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <aside class="md:col-span-1 bg-white p-4 rounded-xl shadow-sm">
+                        <h3 class="font-bold text-lg mb-4 text-slate-900">Topics</h3>
+                        <ul class="space-y-2" id="async-sub-nav">
+                            <li><button class="sub-nav-btn w-full text-left p-2 rounded-md active" data-target="async-eventloop">The Event Loop</button></li>
+                            <li><button class="sub-nav-btn w-full text-left p-2 rounded-md" data-target="async-patterns">Async Patterns</button></li>
+                        </ul>
+                    </aside>
+                    <div class="md:col-span-3 bg-white p-6 rounded-xl shadow-sm">
+                        <div id="async-eventloop" class="async-sub-content active">
+                            <h2 class="text-3xl font-bold mb-4 text-slate-900">Visualizing the Event Loop</h2>
+                            <p class="mb-6 text-slate-600">JavaScript is single-threaded, yet it handles multiple tasks without freezing the browser. The magic behind this is the Event Loop. This interactive diagram demonstrates how the Call Stack, Web APIs, and Queues work together to manage asynchronous operations.</p>
+                            <div class="bg-stone-100 p-4 rounded-lg">
+                                <div class="flex justify-center mb-4">
+                                    <button id="run-event-loop-btn" class="bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition">Run Simulation</button>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                                    <div class="border p-2 rounded-lg">
+                                        <h4 class="font-semibold">Call Stack</h4>
+                                        <div id="call-stack" class="bg-white min-h-[200px] p-2 rounded mt-2 space-y-2 flex flex-col-reverse"></div>
+                                    </div>
+                                    <div class="border p-2 rounded-lg">
+                                        <h4 class="font-semibold">Web APIs</h4>
+                                        <div id="web-apis" class="bg-white min-h-[200px] p-2 rounded mt-2 space-y-2"></div>
+                                    </div>
+                                    <div class="border p-2 rounded-lg">
+                                        <h4 class="font-semibold">Callback Queues</h4>
+                                        <div id="microtask-queue" class="bg-blue-100 min-h-[95px] p-2 rounded mt-2">
+                                            <p class="text-sm font-medium text-blue-800">Microtask (Promises)</p>
+                                        </div>
+                                        <div id="macrotask-queue" class="bg-orange-100 min-h-[95px] p-2 rounded mt-2">
+                                             <p class="text-sm font-medium text-orange-800">Macrotask (setTimeout)</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="async-patterns" class="async-sub-content hidden">
+                           <h2 class="text-3xl font-bold mb-4 text-slate-900">Evolution of Async Patterns</h2>
+                            <p class="mb-6 text-slate-600">JavaScript's approach to handling asynchronous operations has evolved significantly, moving towards more readable and maintainable code.</p>
+                            <div class="space-y-4">
+                                <div class="p-4 border rounded-lg">
+                                    <h4 class="font-semibold text-lg">1. Callbacks</h4>
+                                    <p class="text-slate-600 mt-1">The original pattern. A function is passed as an argument to be executed after an operation completes. Prone to "Callback Hell" (the pyramid of doom) with nested operations, making code hard to read and debug.</p>
+                                </div>
+                                <div class="p-4 border rounded-lg">
+                                    <h4 class="font-semibold text-lg">2. Promises</h4>
+                                    <p class="text-slate-600 mt-1">An object representing the eventual completion (or failure) of an async operation. Promises allow for chaining (`.then()`) and cleaner error handling (`.catch()`), flattening the pyramid of doom.</p>
+                                </div>
+                                <div class="p-4 border rounded-lg">
+                                    <h4 class="font-semibold text-lg">3. Async/Await</h4>
+                                    <p class="text-slate-600 mt-1">Syntactic sugar built on top of Promises. The `async` and `await` keywords allow you to write asynchronous code that looks and behaves like synchronous code, making it much easier to read and reason about. Error handling is done with standard `try...catch` blocks.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- JS State Management Content -->
+            <section id="state-content" class="content-section">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <aside class="md:col-span-1 bg-white p-4 rounded-xl shadow-sm">
+                        <h3 class="font-bold text-lg mb-4 text-slate-900">Topics</h3>
+                        <ul class="space-y-2" id="state-sub-nav">
+                           <li><button class="sub-nav-btn w-full text-left p-2 rounded-md active" data-target="state-challenges">Challenges</button></li>
+                           <li><button class="sub-nav-btn w-full text-left p-2 rounded-md" data-target="state-solutions">Solutions Compared</button></li>
+                        </ul>
+                    </aside>
+                    <div class="md:col-span-3 bg-white p-6 rounded-xl shadow-sm">
+                        <div id="state-challenges" class="state-sub-content active">
+                            <h2 class="text-3xl font-bold mb-4 text-slate-900">The State Management Challenge</h2>
+                            <p class="mb-6 text-slate-600">As applications grow, managing the "state" (the data that drives the UI) becomes complex. This section explores the common problems developers face.</p>
+                            <div class="p-4 border rounded-lg">
+                                <h4 class="font-semibold text-lg">Prop Drilling</h4>
+                                <p class="text-slate-600 mt-1">The most common pain point. When a piece of state is needed by a deeply nested component, it must be passed down through many intermediate components as "props". This creates tightly coupled, hard-to-maintain code. The need to avoid prop drilling is the primary reason for adopting a global state management solution.</p>
+                            </div>
+                        </div>
+                        <div id="state-solutions" class="state-sub-content hidden">
+                            <h2 class="text-3xl font-bold mb-4 text-slate-900">State Management Solutions</h2>
+                            <p class="mb-6 text-slate-600">Various libraries and patterns have emerged to solve state management challenges. This table compares popular solutions. Click a library name for more details.</p>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr>
+                                            <th class="p-2 border-b-2">Library</th>
+                                            <th class="p-2 border-b-2">Core Philosophy</th>
+                                            <th class="p-2 border-b-2">Best For</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="state-solutions-table">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="state-solution-details" class="mt-6 p-4 bg-stone-100 rounded-lg">
+                                <p class="text-slate-600">Select a library from the table to see details here.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainNavBtns = document.querySelectorAll('.nav-btn');
+            const contentSections = document.querySelectorAll('.content-section');
+            const subNavContainers = {
+                api: document.getElementById('api-sub-nav'),
+                async: document.getElementById('async-sub-nav'),
+                state: document.getElementById('state-sub-nav'),
+            };
+
+            function handleNav(navContainer, contentClass) {
+                 if (!navContainer) return;
+                 const subNavBtns = navContainer.querySelectorAll('.sub-nav-btn');
+                 const subContentSections = document.querySelectorAll(`.${contentClass}`);
+                 
+                 subNavBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        subNavBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+
+                        subContentSections.forEach(section => {
+                            section.classList.add('hidden');
+                            section.classList.remove('active');
+                        });
+                        const targetId = btn.getAttribute('data-target');
+                        const targetSection = document.getElementById(targetId);
+                        if(targetSection) {
+                            targetSection.classList.remove('hidden');
+                            targetSection.classList.add('active');
+                        }
+                    });
+                });
+            }
+
+            mainNavBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    mainNavBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    contentSections.forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    const targetId = btn.getAttribute('data-target');
+                    document.getElementById(targetId).classList.add('active');
+                });
+            });
+            
+            handleNav(subNavContainers.api, 'api-sub-content');
+            handleNav(subNavContainers.async, 'async-sub-content');
+            handleNav(subNavContainers.state, 'state-sub-content');
+
+
+            // API Types Chart
+            const apiTypesCtx = document.getElementById('apiTypesChart');
+            if (apiTypesCtx) {
+                new Chart(apiTypesCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['REST', 'GraphQL', 'gRPC', 'Webhooks', 'WebSockets'],
+                        datasets: [{
+                            label: 'Performance/Efficiency',
+                            data: [7, 8, 10, 6, 9],
+                            backgroundColor: 'rgba(15, 118, 110, 0.6)', // teal-700
+                            borderColor: 'rgba(15, 118, 110, 1)',
+                            borderWidth: 1
+                        }, {
+                            label: 'Flexibility/Ease of Use',
+                            data: [8, 9, 6, 7, 7],
+                            backgroundColor: 'rgba(51, 65, 85, 0.6)', // slate-700
+                            borderColor: 'rgba(51, 65, 85, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 10,
+                                grid: {
+                                    color: 'rgba(0,0,0,0.05)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    footer: (tooltipItems) => {
+                                        const tooltips = {
+                                            'REST': 'Resource-oriented. Great for public APIs.',
+                                            'GraphQL': 'Client-driven queries. Solves over/under-fetching.',
+                                            'gRPC': 'High-performance RPC. Ideal for microservices.',
+                                            'Webhooks': 'Event-driven push model. For real-time notifications.',
+                                            'WebSockets': 'Persistent, bidirectional connection. For live chat/games.'
+                                        };
+                                        return tooltips[tooltipItems[0].label] || '';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Event Loop Simulation
+            const runEventLoopBtn = document.getElementById('run-event-loop-btn');
+            const callStackDiv = document.getElementById('call-stack');
+            const webApisDiv = document.getElementById('web-apis');
+            const microtaskQueueDiv = document.getElementById('microtask-queue');
+            const macrotaskQueueDiv = document.getElementById('macrotask-queue');
+
+            function createItem(text, color) {
+                const item = document.createElement('div');
+                item.textContent = text;
+                item.className = `event-loop-item p-2 rounded shadow-sm ${color}`;
+                return item;
+            }
+
+            runEventLoopBtn.addEventListener('click', () => {
+                callStackDiv.innerHTML = '';
+                webApisDiv.innerHTML = '';
+                microtaskQueueDiv.innerHTML = '<p class="text-sm font-medium text-blue-800">Microtask (Promises)</p>';
+                macrotaskQueueDiv.innerHTML = '<p class="text-sm font-medium text-orange-800">Macrotask (setTimeout)</p>';
+
+                let delay = 0;
+                
+                function animate(action, duration = 500) {
+                    return new Promise(resolve => setTimeout(() => {
+                        action();
+                        resolve();
+                    }, duration));
+                }
+
+                async function runSimulation() {
+                    const main = createItem('main()', 'bg-gray-200');
+                    await animate(() => callStackDiv.prepend(main));
+
+                    const log1 = createItem('console.log("Start")', 'bg-gray-200');
+                    await animate(() => callStackDiv.prepend(log1));
+                    await animate(() => log1.remove());
+
+                    const timeout = createItem('setTimeout(cb, 0)', 'bg-orange-200');
+                    await animate(() => callStackDiv.prepend(timeout));
+                    await animate(() => {
+                        timeout.remove();
+                        webApisDiv.appendChild(timeout);
+                    });
+                    
+                    const promise = createItem('Promise.resolve().then(cb)', 'bg-blue-200');
+                    await animate(() => callStackDiv.prepend(promise));
+                    await animate(() => {
+                        promise.remove();
+                        webApisDiv.appendChild(promise);
+                    });
+
+                    const log2 = createItem('console.log("End")', 'bg-gray-200');
+                    await animate(() => callStackDiv.prepend(log2));
+                    await animate(() => log2.remove());
+
+                    await animate(() => {
+                        const promiseCb = createItem('Promise CB', 'bg-blue-200');
+                        promise.remove();
+                        microtaskQueueDiv.appendChild(promiseCb);
+                    });
+
+                    await animate(() => {
+                        const timeoutCb = createItem('setTimeout CB', 'bg-orange-200');
+                        timeout.remove();
+                        macrotaskQueueDiv.appendChild(timeoutCb);
+                    });
+
+                    await animate(() => main.remove()); // Stack is empty
+
+                    // Event loop checks queues
+                    const microCb = microtaskQueueDiv.querySelector('.event-loop-item');
+                    if (microCb) {
+                        await animate(() => {
+                            microCb.remove();
+                            callStackDiv.prepend(microCb);
+                        });
+                        await animate(() => microCb.remove());
+                    }
+
+                    const macroCb = macrotaskQueueDiv.querySelector('.event-loop-item');
+                    if (macroCb) {
+                        await animate(() => {
+                            macroCb.remove();
+                            callStackDiv.prepend(macroCb);
+                        });
+                        await animate(() => macroCb.remove());
+                    }
+                }
+                
+                runSimulation();
+            });
+
+            // State Management Solutions
+            const stateSolutions = [
+                { name: 'Redux', philosophy: 'Predictable state container with a single source of truth and immutable updates.', bestFor: 'Large, complex apps needing strict control.', details: 'Redux enforces a unidirectional data flow (Action -> Reducer -> Store). While it requires more boilerplate, its strictness makes state changes predictable and easy to debug with tools like time-travel.' },
+                { name: 'MobX', philosophy: 'Reactive and flexible, using observable state that updates automatically.', bestFor: 'Apps where performance and less boilerplate are key.', details: 'MobX uses observable data and reactions. It allows for direct mutation of state within actions, which automatically triggers fine-grained re-renders of only the affected components. It feels more like object-oriented programming.' },
+                { name: 'Zustand', philosophy: 'Minimalist, hooks-based solution using a simplified Flux model.', bestFor: 'Lightweight global state without context providers.', details: 'Zustand is small, fast, and unopinionated. It exposes a simple hook to access state, making it feel very similar to React\'s built-in `useState` but for global state.' },
+                { name: 'Jotai', philosophy: 'Atomic approach where state is composed of small, independent pieces.', bestFor: 'Performance-critical apps with complex derived state.', details: 'Jotai avoids unnecessary re-renders by tracking dependencies between atoms. If an atom updates, only components that depend on it will re-render. It offers a bottom-up approach to state management.' },
+                { name: 'Recoil', philosophy: 'Experimental (though widely adopted in practice) state management library by Facebook.', bestFor: 'Large-scale React apps, complex derived state.', details: 'Recoil uses atoms and selectors for efficient shared and derived state. It integrates well with React\'s concurrency features and offers selective re-renders.' },
+                { name: 'Context API', philosophy: 'React\'s built-in way to pass data through the component tree.', bestFor: 'Simple, infrequently updated global data like themes or user auth.', details: 'Context is great for avoiding prop drilling, but it has a major drawback: any change to the context value causes all consuming components to re-render, which can lead to performance issues.' }
+            ];
+
+            const tableBody = document.getElementById('state-solutions-table');
+            const detailsDiv = document.getElementById('state-solution-details');
+
+            stateSolutions.forEach(lib => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="p-2 border-b"><button class="font-semibold text-teal-700 hover:underline state-lib-btn">${lib.name}</button></td>
+                    <td class="p-2 border-b text-slate-600">${lib.philosophy}</td>
+                    <td class="p-2 border-b text-slate-600">${lib.bestFor}</td>
+                `;
+                tableBody.appendChild(row);
+
+                row.querySelector('.state-lib-btn').addEventListener('click', () => {
+                    detailsDiv.innerHTML = `
+                        <h4 class="font-bold text-lg text-slate-900">${lib.name}</h4>
+                        <p class="mt-2 text-slate-700">${lib.details}</p>
+                    `;
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
