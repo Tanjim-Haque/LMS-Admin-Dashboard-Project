@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS LMS Admin Dashboard Project Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Visualization & Content Choices: 
+        - Report Info: Executive Summary, Introduction -> Goal: Provide high-level context -> Viz/Presentation: Text blocks -> Interaction: Static display with subtle hover effect -> Justification: Direct presentation of introductory material with minor engagement.
+        - Report Info: Core Sections & Key Features (User Mgt, Course Mgt, etc.) -> Goal: Detail core functionalities -> Viz/Presentation: Grouped text blocks with headings, under an accordion for each feature. -> Interaction: Click to expand/view details with fade/height transition. -> Justification: Organizes multiple features cleanly with smooth transitions.
+        - Report Info: Advanced Features (Role-Based Customization, Dynamic Widgets, etc.) -> Goal: Explain advanced concepts and their technical implications -> Viz/Presentation: Detailed text blocks. For 'Role-Based Customization', an illustrative HTML/CSS diagram showing roles. For 'Advanced Analytics', an illustrative bar chart (Chart.js) for KPIs. For 'Dynamic Widget System', conceptual interactive widgets. For 'Notification Center', a notification simulation. For 'Bulk Actions', a processing simulation. For 'Communication Tools', a pulsing icon. -> Interaction: Diagrams/charts are illustrative. Interactive elements simulate functionality. -> Justification: Visual aids and conceptual simulations for complex concepts and features to enhance understanding.
+        - Report Info: Key SaaS LMS Admin Dashboard Features & Technical Implications table -> Goal: Present detailed feature-implication mapping -> Viz/Presentation: HTML Table -> Interaction: Static display, scrollable if needed. -> Justification: Standard way to display tabular data.
+        - Report Info: Proposed Technology Stack Overview & Justification Summary table -> Goal: Summarize tech stack -> Viz/Presentation: Text blocks & HTML Table -> Interaction: Static display. -> Justification: Clear presentation of summary.
+        - Report Info: Detailed Justifications for Backend (Node.js), Frontend (React), Database (PostgreSQL) -> Goal: Deep dive into technology choices -> Viz/Presentation: Text blocks. Conceptual bar charts (Chart.js) to illustrate comparative strengths (e.g., Scalability, Maintainability for Node.js; Interactivity, Ecosystem for React; Data Integrity, Scalability for PostgreSQL). -> Interaction: Charts are illustrative. -> Justification: Visual comparison of abstract qualities.
+        - New Section: Project Structure -> Goal: Show project folder layout -> Viz/Presentation: Styled text/tree structure -> Interaction: Static display.
+        - New Section: Resources -> Goal: Provide supplementary information -> Viz/Presentation: List of links/text -> Interaction: Static links.
+        - Report Info: Conclusion -> Goal: Summarize findings -> Viz/Presentation: Text block -> Interaction: Static display. -> Justification: Standard presentation of concluding remarks.
+        - Library/Method: Chart.js for all charts (Canvas). HTML/Tailwind for any simple diagrams and interactive elements.
+    -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .content-section { 
+            display: none; 
+            opacity: 0; 
+            transform: translateY(10px); 
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out; 
+        }
+        .content-section.active { 
+            display: block; 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+        .nav-link { cursor: pointer; padding: 0.75rem 1rem; border-radius: 0.375rem; transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out; }
+        .nav-link:hover { background-color: #0369a1; /* sky-700 */ color: white; }
+        .nav-link.active { background-color: #0ea5e9; /* sky-500 */ color: white; font-weight: 600; }
+        .accordion-content { 
+            max-height: 0; 
+            opacity: 0;
+            overflow: hidden; 
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out; 
+        }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        h2 { font-size: 1.75rem; font-weight: 600; margin-bottom: 1rem; color: #0c4a6e; /* sky-800 */ }
+        h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #075985; /* sky-700 */ }
+        h4 { font-size: 1.1rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; color: #0369a1; /* sky-600 */ }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #e2e8f0; /* slate-200 */ padding: 0.75rem; text-align: left; }
+        th { background-color: #f1f5f9; /* slate-100 */ color: #1e293b; /* slate-800 */ }
+        .tag { display: inline-block; background-color: #e0f2fe; /* sky-100 */ color: #0ea5e9; /* sky-500 */ padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; margin-right: 0.5rem; margin-bottom: 0.5rem;}
+        .pill-nav button { background-color: #e0f2fe; /* sky-100 */ color: #0ea5e9; /* sky-600 */ }
+        .pill-nav button.active { background-color: #0ea5e9; /* sky-500 */ color: white; }
+        .highlight { background-color: #fde68a; /* yellow-200 */ color: #1e293b; /* slate-800 */ border-radius: 0.125rem; padding: 0 0.125rem; }
+
+        /* Custom Animations */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+        }
+        .animate-pulse-subtle {
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-10px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-10px); }
+        }
+        .notification-alert {
+            animation: fadeInOut 3s ease-in-out forwards;
+        }
+
+        /* Overview hover effect */
+        .overview-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-3px);
+            transition: all 0.3s ease-in-out;
+        }
+        .overview-card {
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Dark Mode Styles */
+        html.dark {
+            background-color: #0f172a; /* slate-900 */
+            color: #e2e8f0; /* slate-200 */
+        }
+        html.dark .bg-slate-100 { background-color: #0f172a; } /* slate-900 */
+        html.dark .text-slate-800 { color: #e2e8f0; } /* slate-200 */
+        html.dark .bg-sky-600 { background-color: #075985; } /* sky-800 */
+        html.dark .text-white { color: #e2e8f0; } /* slate-200 */
+        html.dark .nav-link:hover { background-color: #0c4a6e; } /* sky-800 */
+        html.dark .nav-link.active { background-color: #0ea5e9; } /* sky-500 */
+        html.dark .bg-white { background-color: #1e293b; } /* slate-800 */
+        html.dark .text-slate-600 { color: #94a3b8; } /* slate-400 */
+        html.dark h2 { color: #38bdf8; } /* sky-400 */
+        html.dark h3 { color: #0ea5e9; } /* sky-500 */
+        html.dark h4 { color: #38bdf8; } /* sky-400 */
+        html.dark th, html.dark td { border-color: #334155; } /* slate-700 */
+        html.dark th { background-color: #1e293b; color: #e2e8f0; } /* slate-800, slate-200 */
+        html.dark .text-sky-700 { color: #38bdf8; } /* sky-400 */
+        html.dark .hover\:bg-sky-50:hover { background-color: #1e293b; } /* slate-800 */
+        html.dark .bg-sky-50 { background-color: #0f172a; } /* slate-900 */
+        html.dark .text-slate-700 { color: #cbd5e1; } /* slate-300 */
+        html.dark .highlight { background-color: #a16207; color: #f8fafc; } /* amber-700, slate-50 */
+        html.dark #search-input { background-color: #334155; color: #e2e8f0; } /* slate-700, slate-200 */
+        html.dark #search-results-info { color: #94a3b8; } /* slate-400 */
+        html.dark .text-blue-600 { color: #60a5fa; } /* blue-400 */
+        html.dark .dark\:text-blue-400 { color: #60a5fa; } /* blue-400 */
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <nav class="md:w-64 bg-sky-600 text-white p-6 space-y-3 shrink-0">
+            <h1 class="text-2xl font-bold mb-6">LMS Admin Dashboard Project</h1>
+            <div class="relative mb-4">
+                <input type="text" id="search-input" placeholder="Search sections..." class="w-full p-2 rounded-md text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-300">
+                <div id="search-results-info" class="text-xs mt-1 text-sky-100"></div>
+            </div>
+            <a class="nav-link block" data-target="overview">📄 Overview</a>
+            <a class="nav-link block" data-target="core-features">🧩 Core Features</a>
+            <a class="nav-link block" data-target="advanced-features">🚀 Advanced Features</a>
+            <a class="nav-link block" data-target="tech-stack">🛠️ Technology Stack</a>
+            <a class="nav-link block" data-target="project-structure">📁 Project Structure</a>
+            <a class="nav-link block" data-target="resources">🔗 Resources</a>
+            <a class="nav-link block" data-target="conclusion">🏁 Conclusion</a>
+            <button id="theme-toggle" class="mt-4 w-full p-2 rounded-md bg-sky-700 text-white hover:bg-sky-800 transition-colors duration-200 flex items-center justify-center">
+                <span id="theme-icon" class="text-xl mr-2">☀️</span> Toggle Theme
+            </button>
+        </nav>
+
+        <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+            <section id="overview" class="content-section space-y-4">
+                <h2>📄 Report Overview</h2>
+                <p class="text-lg text-slate-600 mb-6">This section provides a high-level summary and introduction to the technology stack recommendation for an advanced SaaS LMS Admin Dashboard, emphasizing its critical role in platform management.</p>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md overview-card">
+                    <h3>Executive Summary: A Strategic Tool for LMS Management</h3>
+                    <p>This report details a comprehensive technology stack recommendation for developing a cutting-edge Software as a Service (SaaS) Learning Management System (LMS) administrative dashboard. The proposed architecture is built upon a robust Node.js with Express.js backend, a dynamic React frontend, and a highly reliable PostgreSQL database. This selection is strategically aligned with the development team's existing expertise in these technologies, promising an expedited and efficient development lifecycle.</p>
+                    <p class="mt-2">The chosen stack delivers substantial benefits essential for a sophisticated administrative dashboard. It offers unparalleled scalability, enabling the platform to effortlessly accommodate a rapidly expanding user base and manage extensive, complex datasets. Maintainability is significantly enhanced through the adoption of modular design principles and industry-leading best practices, ensuring the long-term viability, adaptability, and ease of evolution for the system. Furthermore, these technologies inherently provide robust security features, which are paramount for safeguarding sensitive LMS data and ensuring compliance. The rich and expansive ecosystem of available libraries and frameworks within this stack dramatically accelerates development, facilitating the seamless integration of advanced functionalities such as real-time data processing, interactive data visualizations, and highly dynamic user interfaces. The synergistic interplay between these full-stack components is meticulously designed to deliver an exceptionally responsive, intuitive, and powerful user experience, which is the cornerstone of an effective administrative control hub for any modern LMS.</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md overview-card">
+                    <h3>Introduction: The Indispensable Role of an Effective SaaS LMS Admin Dashboard</h3>
+                    <p>In today's rapidly evolving digital landscape, businesses are increasingly leveraging online courses for diverse strategic objectives, including comprehensive employee training, efficient customer onboarding, and even generating substantial revenue through educational offerings. At the core of these initiatives, a Software as a Service (SaaS) Learning Management System (LMS) serves as the foundational infrastructure, providing a robust platform to create, deliver, and meticulously manage online educational content alongside student enrollments. Central to the success of any SaaS LMS is its administrative dashboard—a pivotal control hub that empowers platform managers to oversee every facet of the system with precision.</p>
+                    <p class="mt-2">This administrative dashboard transcends being merely a collection of data points; it is a strategic, real-time intelligence tool. It enables administrators to make highly informed, data-driven decisions by providing immediate access to critical information. A well-designed dashboard possesses the unique ability to unveil potential business opportunities by intelligently correlating key data points and metrics. It offers a quick, intuitive, and comprehensive way to track the entire learning process, from initial enrollment to final completion, and to analyze specific components in granular detail, thereby highlighting precise areas for continuous improvement and optimization. Ultimately, the efficacy and design of the admin dashboard directly and significantly influence the operational efficiency and overall effectiveness of platform administrators, making it an indispensable asset in the modern online learning ecosystem.</p>
+                </div>
+            </section>
+
+            <section id="core-features" class="content-section space-y-4">
+                <h2>🧩 Core Dashboard Features</h2>
+                <p class="text-lg text-slate-600 mb-6">Explore the fundamental functionalities that form the backbone of an effective SaaS LMS Admin Dashboard.</p>
+                <div id="core-features-accordion" class="space-y-3">
+                    <div class="bg-white rounded-lg shadow-md">
+                        <button class="w-full text-left p-4 font-semibold text-sky-700 hover:bg-sky-50 focus:outline-none flex justify-between items-center accordion-trigger">
+                            User Management
+                            <span class="transform transition-transform duration-200 text-xl origin-center down-arrow">+</span>
+                        </button>
+                        <div class="accordion-content px-4 pb-4 text-slate-700">
+                            <p>Comprehensive administration of various user roles (administrators, learners, instructors). Involves adding, editing, and deleting accounts, assigning roles and permissions with granular control, and viewing activity logs for auditing and security.</p>
+                            <h4 class="mt-4">Administrator Management:</h4>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li><strong>Add, edit, and delete administrator accounts:</strong> This feature allows for the creation of new administrator profiles with varying levels of access, ensuring that only authorized personnel can manage the platform.</li>
+                                <li><strong>Assign and manage administrator roles and permissions:</strong> Implementing role-based access control is essential for data security and assigning appropriate levels of authority to different administrators.</li>
+                                <li><strong>View administrator activity logs:</strong> Monitoring administrator actions through activity logs serves both auditing and security purposes, aiding in identifying any unauthorized activities.</li>
+                            </ul>
+                            <h4 class="mt-4">Learner Management:</h4>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li><strong>Add, edit, and delete learner accounts:</strong> This feature enables efficient management of learner profiles and platform access, streamlining the onboarding process.</li>
+                                <li><strong>View learner profiles:</strong> This provides insights into individual learner activity and performance.</li>
+                                <li><strong>Assign learners to courses and learning paths:</strong> This facilitates targeted learning experiences and manages course enrollments.</li>
+                            </ul>
+                            <h4 class="mt-4">Instructor Management:</h4>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li><strong>Add, edit, and delete instructor accounts:</strong> Similar to learner management, this feature allows for the management of instructor profiles.</li>
+                                <li><strong>Assign instructors to specific courses:</strong> This defines which instructors are responsible for delivering and managing particular courses.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md">
+                        <button class="w-full text-left p-4 font-semibold text-sky-700 hover:bg-sky-50 focus:outline-none flex justify-between items-center accordion-trigger">
+                            Course Management
+                            <span class="transform transition-transform duration-200 text-xl origin-center down-arrow">+</span>
+                        </button>
+                        <div class="accordion-content px-4 pb-4 text-slate-700">
+                            <p>The ability to create, organize, and manage courses is the core functionality of an LMS.</p>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li><strong>Create new courses:</strong> This allows administrators and instructors to develop new learning content.</li>
+                                <li><strong>Organize courses into categories:</strong> Structuring courses logically improves discoverability for learners.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md">
+                        <button class="w-full text-left p-4 font-semibold text-sky-700 hover:bg-sky-50 focus:outline-none flex justify-between items-center accordion-trigger">
+                            Student Management
+                            <span class="transform transition-transform duration-200 text-xl origin-center down-arrow">+</span>
+                        </button>
+                        <div class="accordion-content px-4 pb-4 text-slate-700">
+                            <p>Overseeing student enrollments, progress, and performance is crucial for effective learning administration.</p>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li><strong>View and manage student enrollments:</strong> This provides administrators with a clear overview of which students are enrolled in each course.</li>
+                                <li><strong>Monitor individual student progress within courses:</strong> Tracking learner progress provides insights into engagement and performance.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md">
+                        <button class="w-full text-left p-4 font-semibold text-sky-700 hover:bg-sky-50 focus:outline-none flex justify-between items-center accordion-trigger">
+                            Analytics and Reporting
+                            <span class="transform transition-transform duration-200 text-xl origin-center down-arrow">+</span>
+                        </button>
+                        <div class="accordion-content px-4 pb-4 text-slate-700">
+                            <p>Data-driven insights are essential for optimizing the learning platform and its content.</p>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li><strong>Display key performance indicators (KPIs):</strong> Providing a snapshot of key metrics offers administrators immediate understanding of the platform's overall health.</li>
+                                <li><strong>Generate reports on individual learner progress:</strong> These reports provide a comprehensive view of each learner's journey.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md">
+                        <button class="w-full text-left p-4 font-semibold text-sky-700 hover:bg-sky-50 focus:outline-none flex justify-between items-center accordion-trigger">
+                            System Settings and Configuration
+                            <span class="transform transition-transform duration-200 text-xl origin-center down-arrow">+</span>
+                        </button>
+                        <div class="accordion-content px-4 pb-4 text-slate-700">
+                            <p>This section provides control over the platform's fundamental operation and appearance.</p>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li><strong>Configure platform name, time zone, and default language:</strong> Personalizing the platform enhances user experience.</li>
+                                <li><strong>Manage integrations with other systems:</strong> Integrating the LMS with other platforms streamlines workflows and data sharing.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md">
+                        <button class="w-full text-left p-4 font-semibold text-sky-700 hover:bg-sky-50 focus:outline-none flex justify-between items-center accordion-trigger">
+                            Engagement and Communication Tools
+                            <span class="transform transition-transform duration-200 text-xl origin-center down-arrow">+</span>
+                        </button>
+                        <div class="accordion-content px-4 pb-4 text-slate-700">
+                            <p>Fostering an interactive and collaborative learning environment is essential.</p>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li><strong>Create, schedule, and manage platform-wide announcements:</strong> This allows communication of important updates to all users.</li>
+                                <li><strong>Access built-in messaging tools:</strong> Direct communication enhances support and collaboration among users.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md">
+                        <button class="w-full text-left p-4 font-semibold text-sky-700 hover:bg-sky-50 focus:outline-none flex justify-between items-center accordion-trigger">
+                            Security and Monitoring
+                            <span class="transform transition-transform duration-200 text-xl origin-center down-arrow">+</span>
+                        </button>
+                        <div class="accordion-content px-4 pb-4 text-slate-700">
+                            <p>Ensuring the platform's integrity and protecting user data is paramount.</p>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li><strong>View comprehensive logs of user activity:</strong> Activity logs provide a detailed record for monitoring usage patterns and troubleshooting issues.</li>
+                                <li><strong>Manage password policies and enforce security protocols:</strong> Strong password policies help protect user accounts from unauthorized access.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="advanced-features" class="content-section space-y-6">
+                <h2>🚀 Advanced Features & Technical Implications</h2>
+                <p class="text-lg text-slate-600 mb-6">Delve into the sophisticated capabilities that elevate the dashboard's utility and the technical considerations for their implementation.</p>
+                
+                <div id="advanced-features-accordion" class="space-y-3">
+                    <div class="bg-white rounded-lg shadow-md">
+                        <button class="w-full text-left p-4 font-semibold text-sky-700 hover:bg-sky-50 focus:outline-none flex justify-between items-center accordion-trigger">
+                            Role-Based Customization & Intelligent Access
+                            <span class="transform transition-transform duration-200 text-xl origin-center down-arrow">+</span>
+                        </button>
+                        <div class="accordion-content px-4 pb-4 text-slate-700">
+                            <p>This feature transcends basic role-based access control (RBAC) by allowing administrators to tailor dashboard views based on their specific roles. For instance, instructors may require access to course-centric metrics, while platform administrators need broader datasets, including financial information and overall user engagement statistics. Implementing granular permission controls is essential to precisely manage access to specific modules or actions within the platform. This capability necessitates a highly flexible and extensible authorization system on the backend, which must be tightly integrated with frontend components. The frontend must be capable of dynamically rendering UI elements and data based on the authenticated user's permissions. Concurrently, the database schema requires careful design to efficiently support complex mappings between roles and permissions.</p>
+                            <h4 class="mt-4">Customizable Views:</h4>
+                            <p>Allow administrators to tailor dashboards based on user roles. For instance, instructors might see course-centric metrics, while platform admins can access broader datasets like financials and overall user engagement. Purpose: Streamlines the experience by ensuring each user sees only what’s relevant to their responsibilities.</p>
+                            <h4 class="mt-4">Granular Permission Controls:</h4>
+                            <p>Implement a robust permissions system that lets you control access to specific modules or actions within the platform. Purpose: Enhances security and minimizes the risk of unauthorized actions.</p>
+                            <div class="my-4 p-4 border border-sky-200 rounded-lg bg-sky-50">
+                                <h4 class="text-sky-700 text-center">Illustrative: Role-Based Access</h4>
+                                <div class="flex justify-around items-center text-center mt-2 text-sm">
+                                    <div class="p-3 bg-sky-100 rounded-md shadow"><strong>Platform Admin</strong><br/>Full Access<br/>(Users, Courses, Finance, System)</div>
+                                    <div class="text-2xl text-sky-500">&rarr;</div>
+                                    <div class="p-3 bg-teal-100 rounded-md shadow"><strong>Instructor</strong><br/>Course Mgt, Student Progress (Own Courses)</div>
+                                    <div class="text-2xl text-sky-500">&rarr;</div>
+                                    <div class="p-3 bg-amber-100 rounded-md shadow"><strong>Learner</strong><br/>View Assigned Courses, Own Progress</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md">
+                        <button class="w-full text-left p-4 font-semibold text-sky-700 hover:bg-sky-50 focus:outline-none flex justify-between items-center accordion-trigger">
+                            Dynamic Widget System with Drag-and-Drop Layout
+                            <span class="transform transition-transform duration-200 text-xl origin-center down-arrow">+</span>
+                        </button>
+                        <div class="accordion-content px-4 pb-4 text-slate-700">
+                            <p>Administrators require a modular library of customizable widgets (e.g., key metrics, activity logs, upcoming events) that can be added, removed, or rearranged using an intuitive drag-and-drop interface. This empowers administrators to personalize their workspace for enhanced efficiency. From a technical standpoint, this demands a highly interactive frontend framework capable of real-time Document Object Model (DOM) manipulation, such as React's Virtual DOM. A robust state management solution is also critical to handle the dynamic configuration and rendering of these widgets. On the backend, a mechanism is needed to persist user-specific dashboard layouts and preferences, ensuring that personalized views are retained across sessions.</p>
+                            <h4 class="mt-4">Modular Widgets:</h4>
+                            <p>Offer a library of customizable widgets (e.g., key metrics, activity logs, upcoming events) that admins can add, remove, or rearrange. Purpose: Empowers admins to personalize their workspace for higher efficiency.</p>
+                            <h4 class="mt-4">Drag-and-Drop Interface:</h4>
+                            <p>Implement an intuitive design where admins can reorder dashboard elements in real time. Purpose: Improves the user experience by adapting to diverse workflows and preferences.</p>
+                            <div class="my-4 p-4 border border-sky-200 rounded-lg bg-sky-50 text-center">
+                                <h4 class="text-sky-700">Illustrative: Drag-and-Drop Widget</h4>
+                                <div class="inline-block p-4 bg-white rounded-lg shadow-lg m-2 cursor-grab transform transition-transform duration-200 hover:scale-105 active:scale-95 active:rotate-3">
+                                    📊 Metric Widget
+                                </div>
+                                <div class="inline-block p-4 bg-white rounded-lg shadow-lg m-2 cursor-grab transform transition-transform duration-200 hover:scale-105 active:scale-95 active:rotate-3">
+                                    🔔 Alerts Feed
+                                </div>
+                                <p class="text-sm text-slate-600 mt-2">Hover and click to see conceptual "drag" effect.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md">
+                        <button class="w-full text-left p-4 font-semibold text-sky-700 hover:bg-sky-50 focus:outline-none flex justify-between items-center accordion-trigger">
+                            Advanced Analytics & Custom Reporting
+                            <span class="transform transition-transform duration-200 text-xl origin-center down-arrow">+</span>
+                        </button>
+                        <div class="accordion-content px-4 pb-4 text-slate-700">
+                            <p>This feature involves integrating interactive data visualizations, including advanced charts, graphs, and heat maps, which allow drill-downs into specific metrics like enrollment trends, course completion rates, and revenue performance. Additionally, administrators need tools to generate custom reports with various filters (e.g., timeframes, geographic segments) and export options (CSV, PDF). This functionality requires powerful frontend charting libraries capable of rendering complex data visualizations and supporting user interactivity. On the backend, efficient data aggregation and processing capabilities are essential, leveraging a database optimized for analytical queries and handling large datasets. The ability to export data in various formats will necessitate server-side processing to generate the required file types.</p>
+                            <h4 class="mt-4">Interactive Data Visualizations:</h4>
+                            <p>Integrate advanced charts, graphs, and heat maps that allow drill-downs into metrics such as enrollment trends, course completion rates, and revenue performance. Purpose: Transforms raw data into actionable insights, enabling better decision-making.</p>
+                            <h4 class="mt-4">Customized Reporting Tools:</h4>
+                            <p>Enable admins to generate custom reports with various filters (e.g., timeframes, geographic segments) and export them in diverse formats (CSV, PDF). Purpose: Facilitates deeper analysis and sharing insights across business teams.</p>
+                            <div class="my-4 p-4 border border-sky-200 rounded-lg bg-sky-50">
+                                <h4 class="text-sky-700">Illustrative: Advanced Analytics Example</h4>
+                                <p class="text-sm text-slate-600 mb-2">Conceptual representation of data related to advanced analytics.</p>
+                                <div class="chart-container h-64 md:h-80">
+                                    <canvas id="advancedAnalyticsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md">
+                        <button class="w-full text-left p-4 font-semibold text-sky-700 hover:bg-sky-50 focus:outline-none flex justify-between items-center accordion-trigger">
+                            Comprehensive Notification Center & Real-Time Alerts
+                            <span class="transform transition-transform duration-200 text-xl origin-center down-arrow">+</span>
+                        </button>
+                        <div class="accordion-content px-4 pb-4 text-slate-700">
+                            <p>The dashboard needs a dedicated hub to aggregate all notifications, including alerts, reminders, and system messages. This system should support multi-channel alerts (email, SMS, or in-app messaging) with options for customization and threshold-based triggers, such as alerts for sudden spikes in enrollments. This feature necessitates real-time communication protocols, such as WebSockets, for instant in-app notifications. For reliable multi-channel delivery (email, SMS), a robust messaging queue system might be required. Complex backend logic is also essential for defining, evaluating, and triggering alerts based on specific data conditions and thresholds.</p>
+                            <h4 class="mt-4">Centralized Notification Hub:</h4>
+                            <p>Beyond the “Recent Activity” card, create a dedicated area where all notifications—alerts, reminders, and system messages—are aggregated. Purpose: Ensures that high-priority events don’t get lost and allows admins to manage alerts from a single interface.</p>
+                            <h4 class="mt-4">Multi-Channel Alerts:</h4>
+                            <p>Integrate notifications that can be pushed via email, SMS, or in-app messaging, with options for customization and threshold-based triggers (e.g., sudden spikes in enrollments). Purpose: Keeps the admin informed of critical events in real time and helps in proactive decision-making.</p>
+                            <div class="my-4 p-4 border border-sky-200 rounded-lg bg-sky-50 text-center relative overflow-hidden">
+                                <h4 class="text-sky-700">Illustrative: Real-time Notification</h4>
+                                <button id="simulate-notification" class="mt-2 px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors duration-200">Simulate Notification</button>
+                                <div id="notification-area" class="absolute top-0 left-0 w-full h-full flex items-center justify-center pointer-events-none"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md">
+                        <button class="w-full text-left p-4 font-semibold text-sky-700 hover:bg-sky-50 focus:outline-none flex justify-between items-center accordion-trigger">
+                            Bulk Actions & Workflow Automation
+                            <span class="transform transition-transform duration-200 text-xl origin-center down-arrow">+</span>
+                        </button>
+                        <div class="accordion-content px-4 pb-4 text-slate-700">
+                            <p>Administrators must be able to perform bulk updates (e.g., enrolling multiple users, archiving old courses, or resetting course statuses) and create customizable workflows that automatically trigger actions based on predetermined conditions. This requires efficient backend processing for large data operations, such as batch processing and asynchronous tasks, to prevent blocking the main server thread. A flexible rules engine is also necessary for defining and managing automation workflows. These operations can be CPU-intensive and may benefit from offloading to dedicated worker processes or background jobs to maintain system responsiveness.</p>
+                            <h4 class="mt-4">Batch Processing Triggers:</h4>
+                            <p>Incorporate actions that allow admins to perform bulk updates (e.g., enrolling multiple users, archiving old courses, or resetting course statuses). Purpose: Saves time when managing large datasets, reducing manual effort.</p>
+                            <h4 class="mt-4">Automation Rules Engine:</h4>
+                            <p>Create customizable workflows that automatically trigger actions based on predetermined conditions, such as sending an email when a course is updated or archiving activities beyond a specific date. Purpose: Enhances operational efficiency and minimizes repetitive tasks.</p>
+                            <div class="my-4 p-4 border border-sky-200 rounded-lg bg-sky-50 text-center">
+                                <h4 class="text-sky-700">Illustrative: Bulk Action Processing</h4>
+                                <button id="run-bulk-action" class="mt-2 px-4 py-2 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-colors duration-200">Run Bulk Action</button>
+                                <p id="bulk-action-status" class="mt-2 text-slate-700 font-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md">
+                        <button class="w-full text-left p-4 font-semibold text-sky-700 hover:bg-sky-50 focus:outline-none flex justify-between items-center accordion-trigger">
+                            Integrated Communication & Support Tools
+                            <span class="transform transition-transform duration-200 text-xl origin-center down-arrow">+</span>
+                        </button>
+                        <div class="accordion-content px-4 pb-4 text-slate-700">
+                            <p>Embedding an internal chat or messaging tool to facilitate immediate communication between the admin team and support, or directly with users, is a key requirement. This also includes a self-service support section with FAQs, documentation, and potentially chatbots. Similar to real-time alerts, an internal messaging system benefits significantly from WebSockets for instantaneous communication. Chatbot integration might involve integrating with third-party Artificial Intelligence (AI) Application Programming Interfaces (APIs) or developing a custom Natural Language Processing (NLP) backend.</p>
+                            <h4 class="mt-4">Internal Messaging System:</h4>
+                            <p>Embed a chat or messaging tool that facilitates immediate communication between the admin team and support or even directly with users. Purpose: Fosters quick resolution of issues and fosters collaboration among team members.</p>
+                            <h4 class="mt-4">Help Center Integration:</h4>
+                            <p>Integrate a self-service support section with FAQs, documentation, and even chatbots to answer common queries without leaving the dashboard. Purpose: Reduces dependency on external support channels and accelerates workflow.</p>
+                            <div class="my-4 p-4 border border-sky-200 rounded-lg bg-sky-50 text-center">
+                                <h4 class="text-sky-700">Illustrative: Communication Tool</h4>
+                                <span class="text-5xl cursor-pointer text-blue-500 animate-pulse-subtle">💬</span>
+                                <p class="text-sm text-slate-600 mt-2">Click to open conceptual chat.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md mt-8">
+                    <h3>Table 1: Key SaaS LMS Admin Dashboard Features & Technical Implications</h3>
+                    <div class="overflow-x-auto">
+                        <table id="table1-features">
+                            <thead>
+                                <tr>
+                                    <th>Feature Name</th>
+                                    <th>Description</th>
+                                    <th>Technical Implications</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tech-stack" class="content-section space-y-6">
+                <h2>🛠️ Proposed Technology Stack</h2>
+                <p class="text-lg text-slate-600 mb-6">An overview and justification of the recommended technologies: PERN (PostgreSQL, Express.js, React, Node.js).</p>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3>Overall Stack: PERN</h3>
+                    <p>The recommended technology stack for the SaaS LMS Admin Dashboard is a robust combination often referred to as the "PERN" stack: PostgreSQL, Express.js, React, and Node.js. This variant of popular full-stack paradigms is specifically chosen for PostgreSQL's strong relational capabilities and ACID compliance, which are critically important for an LMS where data integrity and transactional reliability are paramount. This stack leverages the team's existing proficiency with these technologies, promising a streamlined development process.</p>
+                    <ul class="list-disc list-inside mt-2 space-y-1">
+                        <li><strong>Backend:</strong> Node.js with Express.js</li>
+                        <li><strong>Frontend:</strong> React</li>
+                        <li><strong>Database:</strong> PostgreSQL</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md mt-8">
+                    <h3>Table 2: Technology Stack Justification Summary</h3>
+                    <div class="overflow-x-auto">
+                        <table id="table2-tech-summary">
+                            <thead>
+                                <tr>
+                                    <th>Technology Component</th>
+                                    <th>Primary Role</th>
+                                    <th>Key Strengths</th>
+                                    <th>Alignment with User Proficiency</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md mt-8">
+                    <h3>Backend Justification: Node.js & Express.js</h3>
+                    <p>Node.js, coupled with the Express.js framework, is an excellent choice for the backend of the LMS Admin Dashboard due to its inherent strengths in handling high traffic, ensuring maintainability, providing robust security, and facilitating real-time communication.</p>
+                    <h4>Scalability for High Traffic & Concurrency</h4>
+                    <p>Node.js is exceptionally well-suited for high-traffic applications primarily because of its event-driven, non-blocking I/O model. This architecture allows it to handle a large number of concurrent connections with minimal latency and fewer resources compared to traditional blocking approaches.</p>
+                    <h4>Maintainability & Best Practices</h4>
+                    <p>Express.js encourages a modular file structure. The adoption of `async/await` for handling asynchronous tasks greatly simplifies complex callback chains. Proper error handling and centralized logging are crucial.</p>
+                    <h4>Security Considerations & Best Practices</h4>
+                    <p>Robust security is paramount. Node.js with Express.js supports strong authentication (JWT, OAuth), RBAC, password hashing (bcrypt), HTTPS, input validation (Joi, express-validator), rate limiting, and secure token handling (HTTP-only cookies).</p>
+                     <h4>Real-time Communication Capabilities</h4>
+                    <p>Node.js excels in real-time applications (notifications, chat) using WebSockets, often with libraries like `Socket.io`.</p>
+                    <div class="mt-4 p-4 border border-sky-200 rounded-lg bg-sky-50">
+                        <h4 class="text-sky-700">Illustrative: Backend Strengths Comparison</h4>
+                        <p class="text-sm text-slate-600 mb-2">Conceptual representation of Node.js/Express.js strengths (Scale: 1-5, Higher is Better).</p>
+                        <div class="chart-container h-64 md:h-80">
+                            <canvas id="backendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md mt-8">
+                    <h3>Frontend Justification: React</h3>
+                    <p>React is a highly suitable choice for the frontend, particularly given its strengths in interactivity, component reusability, a rich ecosystem, and scalability for complex user interfaces.</p>
+                    <h4>Highly Interactive & Responsive UI</h4>
+                    <p>React's Virtual DOM enhances rendering efficiency, crucial for data-heavy dashboards with real-time updates.</p>
+                    <h4>Reusability & Maintainability</h4>
+                    <p>Component-based architecture promotes modular design. Declarative syntax simplifies UI updates.</p>
+                    <h4>Rich Ecosystem & Libraries for Data Visualization</h4>
+                    <p>Extensive libraries for charting (Recharts, Nivo), state management (Zustand, Redux), and UI components (MUI, Ant Design).</p>
+                    <div class="mt-4 p-4 border border-sky-200 rounded-lg bg-sky-50">
+                        <h4 class="text-sky-700">Illustrative: Frontend Strengths Comparison</h4>
+                        <p class="text-sm text-slate-600 mb-2">Conceptual representation of React strengths (Scale: 1-5, Higher is Better).</p>
+                        <div class="chart-container h-64 md:h-80">
+                            <canvas id="frontendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md mt-8">
+                    <h3>Database Justification: PostgreSQL</h3>
+                    <p>PostgreSQL is a robust relational database system, excellent for its data integrity, scalability, security, and advanced data handling.</p>
+                    <h4>Data Integrity (ACID Compliance)</h4>
+                    <p>Full ACID compliance (Atomicity, Consistency, Isolation, Durability) is fundamental for LMS data integrity.</p>
+                    <h4>Scalability for Large Datasets & Analytics</h4>
+                    <p>Supports partitioning, indexing, replication, clustering, and optimized queries for handling large datasets and analytics.</p>
+                    <h4>Security Features & Best Practices</h4>
+                    <p>Offers robust access control, user roles/permissions, Row-Level Security (RLS), and encryption (SSL, pgcrypto).</p>
+                    <h4>Advanced Data Types (JSONB)</h4>
+                    <p>Efficiently handles flexible/semi-structured data (user preferences, dynamic configs) with `jsonb`, supporting indexing and faster querying.</p>
+                    <div class="mt-4 p-4 border border-sky-200 rounded-lg bg-sky-50">
+                        <h4 class="text-sky-700">Illustrative: Database Strengths Comparison</h4>
+                        <p class="text-sm text-slate-600 mb-2">Conceptual representation of PostgreSQL strengths (Scale: 1-5, Higher is Better).</p>
+                        <div class="chart-container h-64 md:h-80">
+                            <canvas id="databaseChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="project-structure" class="content-section space-y-4">
+                <h2>📁 Project Structure</h2>
+                <p class="text-lg text-slate-600 mb-6">A conceptual overview of the recommended project directory structure for the SaaS LMS Admin Dashboard.</p>
+                <div class="bg-white p-6 rounded-lg shadow-md font-mono text-sm">
+                    <pre>
+my-saas-dashboard/
+├── server/
+│   ├── config/
+│   │   └── db.js
+│   ├── controllers/
+│   │   ├── userController.js
+│   │   ├── courseController.js
+│   │   └── activityController.js
+│   ├── models/
+│   │   ├── User.js
+│   │   ├── Course.js
+│   │   └── Activity.js
+│   ├── routes/
+│   │   ├── users.js
+│   │   ├── courses.js
+│   │   └── activities.js
+│   ├── .env
+│   └── server.js
+└── client/
+    ├── public/
+    ├── src/
+    │   ├── components/
+    │   │   ├── Dashboard.js
+    │   │   ├── RecentActivity.js
+    │   │   └── Header.js
+    │   ├── App.js
+    │   ├── index.css
+    │   └── index.js
+    └── package.json
+                    </pre>
+                </div>
+            </section>
+
+            <section id="resources" class="content-section space-y-4">
+                <h2>🔗 Resources</h2>
+                <p class="text-lg text-slate-600 mb-6">Explore supplementary resources related to SaaS LMS development and the technologies discussed in this report.</p>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3>Further Reading & Tools</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><a href="https://nodejs.org/en/docs/" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">Node.js Official Documentation</a>: Comprehensive guide for Node.js development.</li>
+                        <li><a href="https://expressjs.com/" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">Express.js Official Website</a>: Learn more about the minimalist web framework for Node.js.</li>
+                        <li><a href="https://react.dev/" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">React Official Documentation</a>: The official guide to React for building user interfaces.</li>
+                        <li><a href="https://www.postgresql.org/docs/" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">PostgreSQL Official Documentation</a>: Detailed documentation for the world's most advanced open source relational database.</li>
+                        <li><a href="https://www.chartjs.org/docs/latest/" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">Chart.js Documentation</a>: Explore how to create various charts and data visualizations.</li>
+                        <li><a href="https://tailwindcss.com/docs" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">Tailwind CSS Documentation</a>: Utility-first CSS framework for rapid UI development.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="conclusion" class="content-section space-y-4">
+                <h2>🏁 Conclusion</h2>
+                <p class="text-lg text-slate-600 mb-6">Final thoughts on the recommended technology stack and its benefits for the SaaS LMS Admin Dashboard.</p>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p>The comprehensive analysis of the SaaS LMS Admin Dashboard requirements, coupled with a detailed evaluation of technology capabilities, strongly supports the recommendation of a Node.js (Express.js) backend, React frontend, and PostgreSQL database. This full-stack combination is not only aligned with the development team's existing proficiencies but also inherently possesses the architectural strengths required to meet the core functionalities and advanced features of a sophisticated administrative platform.</p>
+                    <p class="mt-2">Node.js with Express.js offers the necessary scalability to handle high traffic and concurrency through its non-blocking I/O model and robust horizontal scaling mechanisms. Its modular structure and asynchronous programming patterns contribute significantly to long-term maintainability, enabling efficient development and debugging. Critically, the backend provides the foundational security measures, including strong authentication, granular authorization, input validation, and secure token management, which are indispensable for protecting sensitive LMS data and administrative functions. Furthermore, Node.js's native strengths in real-time communication, leveraged with libraries like Socket.io, are perfectly suited for implementing dynamic notifications and integrated communication tools.</p>
+                    <p class="mt-2">React stands out as the optimal choice for the frontend due to its ability to create highly interactive and responsive user interfaces through its Virtual DOM. Its component-based architecture promotes reusability and maintainability, allowing for efficient development of complex dashboards with features like dynamic widgets and customizable layouts. The rich ecosystem of React charting libraries, state management solutions, and UI component frameworks provides the necessary tools to build advanced analytics visualizations and ensure a polished user experience.</p>
+                    <p class="mt-2">PostgreSQL serves as a robust and reliable database solution. Its strict adherence to ACID properties guarantees data integrity and transactional reliability, which is paramount for an LMS managing critical user and course information. The database's advanced scaling capabilities, including partitioning, indexing, and replication, ensure efficient handling of large datasets and high-volume analytical queries. PostgreSQL's comprehensive security features, such as granular access control, row-level security, and encryption options, provide a secure foundation for data storage. The inclusion of the `jsonb` data type further enhances flexibility, allowing for efficient storage and querying of semi-structured data, which is beneficial for dynamic dashboard configurations and activity logs.</p>
+                    <p class="mt-2">In summary, this technology stack provides a cohesive and powerful foundation that directly addresses the complex requirements of an advanced SaaS LMS Admin Dashboard. It offers a balanced approach to performance, scalability, maintainability, and security, ensuring that the platform can evolve and support the growing needs of an online learning environment effectively.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const reportData = {
+            coreFeatures: [
+                { 
+                    title: "User Management", 
+                    content: "Comprehensive administration of various user roles (administrators, learners, instructors). Involves adding, editing, and deleting accounts, assigning roles and permissions with granular control, and viewing activity logs for auditing and security." 
+                },
+                { 
+                    title: "Course Management", 
+                    content: "Ability to create new courses and organize them into logical categories, improving discoverability and content structuring for learners." 
+                },
+                { 
+                    title: "Student Management", 
+                    content: "Overseeing student enrollments, monitoring individual student progress within courses, and facilitating targeted learning experiences." 
+                },
+                { 
+                    title: "Analytics and Reporting", 
+                    content: "Providing data-driven insights by displaying Key Performance Indicators (KPIs) and generating detailed reports on individual learner progress." 
+                },
+                { 
+                    title: "System Settings and Configuration", 
+                    content: "Control over platform name, time zone, default language, and managing integrations with other systems." 
+                },
+                { 
+                    title: "Engagement and Communication Tools", 
+                    content: "Fostering an interactive learning environment through platform-wide announcements and built-in messaging tools." 
+                },
+                { 
+                    title: "Security and Monitoring", 
+                    content: "Ensuring platform integrity and protecting user data by viewing comprehensive logs of user activity and managing password policies." 
+                }
+            ],
+            advancedFeatures: [
+                { 
+                    title: "Role-Based Customization & Intelligent Access", 
+                    description: "This feature transcends basic role-based access control (RBAC) by allowing administrators to tailor dashboard views based on their specific roles. For instance, instructors may require access to course-centric metrics, while platform administrators need broader datasets, including financial information and overall user engagement statistics. Implementing granular permission controls is essential to precisely manage access to specific modules or actions within the platform. This capability necessitates a highly flexible and extensible authorization system on the backend, which must be tightly integrated with frontend components. The frontend must be capable of dynamically rendering UI elements and data based on the authenticated user's permissions. Concurrently, the database schema requires careful design to efficiently support complex mappings between roles and permissions.",
+                    viz: `<div class="my-4 p-4 border border-sky-200 rounded-lg bg-sky-50">
+                            <h4 class="text-sky-700 text-center">Illustrative: Role-Based Access</h4>
+                            <div class="flex justify-around items-center text-center mt-2 text-sm">
+                                <div class="p-3 bg-sky-100 rounded-md shadow"><strong>Platform Admin</strong><br/>Full Access<br/>(Users, Courses, Finance, System)</div>
+                                <div class="text-2xl text-sky-500">&rarr;</div>
+                                <div class="p-3 bg-teal-100 rounded-md shadow"><strong>Instructor</strong><br/>Course Mgt, Student Progress (Own Courses)</div>
+                                <div class="2xl text-sky-500">&rarr;</div>
+                                <div class="p-3 bg-amber-100 rounded-md shadow"><strong>Learner</strong><br/>View Assigned Courses, Own Progress</div>
+                            </div>
+                          </div>`
+                },
+                { 
+                    title: "Dynamic Widget System with Drag-and-Drop Layout", 
+                    description: "Administrators require a modular library of customizable widgets (e.g., key metrics, activity logs, upcoming events) that can be added, removed, or rearranged using an intuitive drag-and-drop interface. This empowers administrators to personalize their workspace for enhanced efficiency. From a technical standpoint, this demands a highly interactive frontend framework capable of real-time Document Object Model (DOM) manipulation, such as React's Virtual DOM. A robust state management solution is also critical to handle the dynamic configuration and rendering of these widgets. On the backend, a mechanism is needed to persist user-specific dashboard layouts and preferences, ensuring that personalized views are retained across sessions.",
+                    viz: `<div class="my-4 p-4 border border-sky-200 rounded-lg bg-sky-50 text-center">
+                            <h4 class="text-sky-700">Illustrative: Drag-and-Drop Widget</h4>
+                            <div class="inline-block p-4 bg-white rounded-lg shadow-lg m-2 cursor-grab transform transition-transform duration-200 hover:scale-105 active:scale-95 active:rotate-3">
+                                📊 Metric Widget
+                            </div>
+                            <div class="inline-block p-4 bg-white rounded-lg shadow-lg m-2 cursor-grab transform transition-transform duration-200 hover:scale-105 active:scale-95 active:rotate-3">
+                                🔔 Alerts Feed
+                            </div>
+                            <p class="text-sm text-slate-600 mt-2">Hover and click to see conceptual "drag" effect.</p>
+                          </div>`
+                },
+                { 
+                    title: "Advanced Analytics & Custom Reporting", 
+                    description: "This feature involves integrating interactive data visualizations, including advanced charts, graphs, and heat maps, which allow drill-downs into specific metrics like enrollment trends, course completion rates, and revenue performance. Additionally, administrators need tools to generate custom reports with various filters (e.g., timeframes, geographic segments) and export options (CSV, PDF). This functionality requires powerful frontend charting libraries capable of rendering complex data visualizations and supporting user interactivity. On the backend, efficient data aggregation and processing capabilities are essential, leveraging a database optimized for analytical queries and handling large datasets. The ability to export data in various formats will necessitate server-side processing to generate the required file types.",
+                    vizChartId: "advancedAnalyticsChart"
+                },
+                { 
+                    title: "Comprehensive Notification Center & Real-Time Alerts", 
+                    description: "The dashboard needs a dedicated hub to aggregate all notifications, including alerts, reminders, and system messages. This system should support multi-channel alerts (email, SMS, or in-app messaging) with options for customization and threshold-based triggers, such as alerts for sudden spikes in enrollments. This feature necessitates real-time communication protocols, such as WebSockets, for instant in-app notifications. For reliable multi-channel delivery (email, SMS), a robust messaging queue system might be required. Complex backend logic is also essential for defining, evaluating, and triggering alerts based on specific data conditions and thresholds.",
+                    viz: `<div class="my-4 p-4 border border-sky-200 rounded-lg bg-sky-50 text-center relative overflow-hidden">
+                            <h4 class="text-sky-700">Illustrative: Real-time Notification</h4>
+                            <button id="simulate-notification" class="mt-2 px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors duration-200">Simulate Notification</button>
+                            <div id="notification-area" class="absolute top-0 left-0 w-full h-full flex items-center justify-center pointer-events-none"></div>
+                          </div>`
+                },
+                { 
+                    title: "Bulk Actions & Workflow Automation", 
+                    description: "Administrators must be able to perform bulk updates (e.g., enrolling multiple users, archiving old courses, or resetting course statuses) and create customizable workflows that automatically trigger actions based on predetermined conditions. This requires efficient backend processing for large data operations, such as batch processing and asynchronous tasks, to prevent blocking the main server thread. A flexible rules engine is also necessary for defining and managing automation workflows. These operations can be CPU-intensive and may benefit from offloading to dedicated worker processes or background jobs to maintain system responsiveness.",
+                    viz: `<div class="my-4 p-4 border border-sky-200 rounded-lg bg-sky-50 text-center">
+                            <h4 class="text-sky-700">Illustrative: Bulk Action Processing</h4>
+                            <button id="run-bulk-action" class="mt-2 px-4 py-2 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-colors duration-200">Run Bulk Action</button>
+                            <p id="bulk-action-status" class="mt-2 text-slate-700 font-semibold"></p>
+                          </div>`
+                },
+                { 
+                    title: "Integrated Communication & Support Tools", 
+                    description: "Embedding an internal chat or messaging tool to facilitate immediate communication between the admin team and support, or directly with users, is a key requirement. This also includes a self-service support section with FAQs, documentation, and potentially chatbots. Similar to real-time alerts, an internal messaging system benefits significantly from WebSockets for instantaneous communication. Chatbot integration might involve integrating with third-party Artificial Intelligence (AI) Application Programming Interfaces (APIs) or developing a custom Natural Language Processing (NLP) backend.",
+                    viz: `<div class="my-4 p-4 border border-sky-200 rounded-lg bg-sky-50 text-center">
+                            <h4 class="text-sky-700">Illustrative: Communication Tool</h4>
+                            <span class="text-5xl cursor-pointer text-blue-500 animate-pulse-subtle">💬</span>
+                            <p class="text-sm text-slate-600 mt-2">Click to open conceptual chat.</p>
+                          </div>`
+                }
+            ],
+            table1Data: [
+                { feature: "User Management", description: "Comprehensive administration of user roles (admins, learners, instructors), including adding/editing/deleting accounts, assigning permissions, and viewing activity logs.", implications: "Requires robust authentication (e.g., JWT, OAuth) and authorization (RBAC) mechanisms. Database schema must support complex user roles and permissions." },
+                { feature: "Course Management", description: "Ability to create new courses and organize them into categories.", implications: "Backend APIs for content creation and categorization. Database schema for course metadata and relationships." },
+                { feature: "Student Management", description: "Overseeing student enrollments, progress, and performance.", implications: "Efficient database queries for tracking student data. Backend logic for progress calculation and reporting." },
+                { feature: "Analytics and Reporting", description: "Displaying KPIs and generating reports on learner progress.", implications: "Powerful frontend charting libraries. Backend data aggregation and processing. Database optimized for analytical queries." },
+                { feature: "System Settings and Configuration", description: "Control over platform name, time zone, language, and integrations.", implications: "Backend APIs for configuration management. Secure storage for system settings." },
+                { feature: "Engagement and Communication Tools", description: "Platform-wide announcements and built-in messaging.", implications: "Real-time communication (e.g., WebSockets) for messaging. Backend for scheduling and delivering announcements." },
+                { feature: "Security and Monitoring", description: "User activity logs and password policy management.", implications: "Comprehensive logging system. Secure password hashing and authentication protocols." },
+                { feature: "Role-Based Customization & Intelligent Access", description: "Tailored dashboard views and granular permission controls based on user roles.", implications: "Highly flexible backend authorization system. Dynamic frontend rendering based on user permissions. Database schema for complex role-permission mapping." },
+                { feature: "Dynamic Widget System with Drag-and-Drop Layout", description: "Modular widgets with intuitive drag-and-drop interface for personalized workspaces.", implications: "Interactive frontend framework (e.g., React's Virtual DOM). Robust state management. Backend API to persist user-specific layouts." },
+                { feature: "Advanced Analytics & Custom Reporting", description: "Interactive data visualizations (charts, graphs, heat maps) with drill-downs; custom report generation with filters and export options.", implications: "Advanced frontend charting libraries. Efficient backend data aggregation/processing for large datasets. Server-side processing for report generation/export." },
+                { feature: "Comprehensive Notification Center & Real-Time Alerts", description: "Centralized notification hub with multi-channel alerts and threshold-based triggers.", implications: "Real-time communication (WebSockets). Robust messaging queue system. Complex backend logic for alert evaluation and triggering." },
+                { feature: "Bulk Actions & Workflow Automation", description: "Batch processing for updates (e.g., enrolling multiple users); customizable workflow automation based on conditions.", implications: "Efficient backend processing for large data operations (batch processing, asynchronous tasks). Flexible rules engine for automation workflows." },
+                { feature: "Integrated Communication & Support Tools", description: "Internal chat/messaging system; self-service help center with FAQs and chatbots.", implications: "Real-time communication (WebSockets). Integration with third-party AI APIs or custom NLP backend for chatbots." }
+            ],
+            table2Data: [
+                { component: "Node.js & Express.js", role: "Backend API, business logic, server-side operations, real-time communication.", strengths: "Scalability (non-blocking I/O, horizontal scaling), Maintainability (modular structure, async/await), Security (robust authentication, input validation), Real-time capabilities (WebSockets).", alignment: "Proficient in Node.js, Express.js." },
+                { component: "React", role: "Frontend UI, interactive dashboard components, data visualization.", strengths: "Highly Interactive (Virtual DOM, real-time updates), Reusable Components (modular design), Rich Ecosystem (charting, state management, UI libraries), Scalability for complex UIs.", alignment: "Proficient in React." },
+                { component: "PostgreSQL", role: "Relational Database, data storage, analytics, reporting.", strengths: "Data Integrity (ACID compliance), Scalability (partitioning, replication, indexing), Security (access control, encryption), Advanced Data Types (JSONB for flexible data).", alignment: "Proficient in PostgreSQL." }
+            ]
+        };
+
+        let originalSectionContents = {}; 
+
+        let myAdvancedAnalyticsChart; 
+        let myBackendChart;
+        let myFrontendChart;
+        let myDatabaseChart;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const coreFeaturesAccordion = document.getElementById('core-features-accordion');
+            const advancedFeaturesAccordion = document.getElementById('advanced-features-accordion');
+            const table1Body = document.getElementById('table1-features').querySelector('tbody');
+            const table2Body = document.getElementById('table2-tech-summary').querySelector('tbody');
+            const searchInput = document.getElementById('search-input');
+            const searchResultsInfo = document.getElementById('search-results-info');
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
+            const htmlElement = document.documentElement;
+
+            function updateAllChartsTheme(isDarkMode) {
+                const textColor = isDarkMode ? '#e2e8f0' : '#475569'; 
+                const gridColor = isDarkMode ? '#334155' : '#e2e8f0'; 
+
+                [myBackendChart, myFrontendChart, myDatabaseChart, myAdvancedAnalyticsChart].forEach(chartInstance => {
+                    if (chartInstance) {
+                        chartInstance.options.plugins.legend.labels.color = textColor;
+                        chartInstance.options.scales.y.ticks.color = textColor;
+                        chartInstance.options.scales.x.ticks.color = textColor;
+                        chartInstance.options.scales.y.grid.color = gridColor;
+                        if (chartInstance.options.scales.x.grid && chartInstance.options.scales.x.grid.display !== false) {
+                            chartInstance.options.scales.x.grid.color = gridColor;
+                        }
+                        chartInstance.update();
+                    }
+                });
+            }
+
+            function applyTheme(isDarkMode) {
+                if (isDarkMode) {
+                    htmlElement.classList.add('dark');
+                    themeIcon.textContent = '🌙'; 
+                } else {
+                    htmlElement.classList.remove('dark');
+                    themeIcon.textContent = '☀️'; 
+                }
+                localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+                updateAllChartsTheme(isDarkMode);
+            }
+
+            function toggleTheme() {
+                const isDarkMode = htmlElement.classList.contains('dark');
+                applyTheme(!isDarkMode);
+            }
+
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                applyTheme(true);
+            } else {
+                applyTheme(false);
+            }
+
+            themeToggleBtn.addEventListener('click', toggleTheme);
+
+
+            function setActiveSection(targetId) {
+                const currentActiveSection = document.querySelector('.content-section.active');
+                const newActiveSection = document.getElementById(targetId);
+
+                if (currentActiveSection) {
+                    currentActiveSection.style.opacity = '0';
+                    currentActiveSection.style.transform = 'translateY(10px)'; 
+                    setTimeout(() => {
+                        currentActiveSection.classList.remove('active');
+                        currentActiveSection.style.transform = 'translateY(0)'; 
+                        showNewSection();
+                    }, 300); 
+                } else {
+                    showNewSection();
+                }
+
+                function showNewSection() {
+                    newActiveSection.classList.add('active');
+                    void newActiveSection.offsetWidth; 
+                    newActiveSection.style.opacity = '1';
+                    newActiveSection.style.transform = 'translateY(0)'; 
+                    initializeCharts(); 
+                    updateAllChartsTheme(htmlElement.classList.contains('dark')); 
+                    setupAdvancedFeatureInteractions(); 
+                }
+
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.dataset.target === targetId);
+                });
+                window.scrollTo(0, 0); 
+            }
+
+            function resetSections() {
+                contentSections.forEach(section => {
+                    section.innerHTML = originalSectionContents[section.id]; 
+                    section.classList.remove('active'); 
+                });
+                document.querySelectorAll('.accordion-content').forEach(content => {
+                    content.style.maxHeight = "0px";
+                    content.style.opacity = "0"; 
+                    const arrow = content.previousElementSibling.querySelector('.down-arrow');
+                    if(arrow) {
+                        arrow.textContent = '+';
+                        arrow.classList.remove('rotate-45');
+                    }
+                });
+                setActiveSection('overview'); 
+                searchResultsInfo.textContent = '';
+                initializeCharts(); 
+                updateAllChartsTheme(htmlElement.classList.contains('dark')); 
+                setupAdvancedFeatureInteractions(); 
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    searchInput.value = ''; 
+                    resetSections(); 
+                    setActiveSection(this.dataset.target);
+                });
+            });
+            
+            // Core Features Accordion (Static HTML for full content)
+            // The content for Core Features is now directly in the HTML.
+            // This ensures it's available for search and initial content saving.
+
+            // Populate Advanced Features Accordion (Dynamic content for viz/chart)
+            reportData.advancedFeatures.forEach((feature, index) => {
+                const div = document.createElement('div');
+                div.classList.add('bg-white', 'rounded-lg', 'shadow-md');
+                let vizHtml = feature.viz || '';
+                if (feature.vizChartId) {
+                    vizHtml = `<div class="my-4 p-4 border border-sky-200 rounded-lg bg-sky-50">
+                                 <h4 class="text-sky-700">Illustrative: ${feature.title} Example</h4>
+                                 <p class="text-sm text-slate-600 mb-2">Conceptual representation of data related to ${feature.title.toLowerCase()}.</p>
+                                 <div class="chart-container h-64 md:h-80">
+                                     <canvas id="${feature.vizChartId}"></canvas>
+                                 </div>
+                               </div>`;
+                }
+                div.innerHTML = `
+                    <button class="w-full text-left p-4 font-semibold text-sky-700 hover:bg-sky-50 focus:outline-none flex justify-between items-center accordion-trigger">
+                        ${feature.title}
+                        <span class="transform transition-transform duration-200 text-xl origin-center down-arrow">+</span>
+                    </button>
+                    <div class="accordion-content px-4 pb-4 text-slate-700">
+                        <p>${feature.description}</p>
+                        ${vizHtml}
+                    </div>
+                `;
+                advancedFeaturesAccordion.appendChild(div);
+            });
+
+            // Populate Table 1
+            reportData.table1Data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${row.feature}</strong></td>
+                    <td>${row.description}</td>
+                    <td>${row.implications}</td>
+                `;
+                table1Body.appendChild(tr);
+            });
+
+            // Populate Table 2
+            reportData.table2Data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${row.component}</strong></td>
+                    <td>${row.role}</td>
+                    <td>${row.strengths}</td>
+                    <td>${row.alignment}</td>
+                `;
+                table2Body.appendChild(tr);
+            });
+
+            // Store original content of each section AFTER all dynamic content is populated
+            contentSections.forEach(section => {
+                originalSectionContents[section.id] = section.innerHTML;
+            });
+
+            document.querySelectorAll('.accordion-trigger').forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.nextElementSibling;
+                    const arrow = button.querySelector('.down-arrow');
+                    if (content.style.maxHeight && content.style.maxHeight !== "0px") {
+                        content.style.maxHeight = "0px";
+                        content.style.opacity = "0"; 
+                        arrow.textContent = '+';
+                        arrow.classList.remove('rotate-45');
+                    } else {
+                        const group = button.closest('.space-y-3'); 
+                        if (group) {
+                             group.querySelectorAll('.accordion-content').forEach(openContent => {
+                                if (openContent !== content && openContent.style.maxHeight && openContent.style.maxHeight !== "0px") {
+                                    openContent.style.maxHeight = "0px";
+                                    openContent.style.opacity = "0"; 
+                                    const openArrow = openContent.previousElementSibling.querySelector('.down-arrow');
+                                    if(openArrow) {
+                                      openArrow.textContent = '+';
+                                      openArrow.classList.remove('rotate-45');
+                                    }
+                                }
+                            });
+                        }
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        content.style.opacity = "1"; 
+                        arrow.textContent = '-';
+                        arrow.classList.add('rotate-45');
+
+                        const chartCanvas = content.querySelector('canvas');
+                        if (chartCanvas && chartCanvas.id === 'advancedAnalyticsChart' && !Chart.getChart(chartCanvas.id)) {
+                            createAdvancedAnalyticsChart();
+                        }
+                        setupAdvancedFeatureInteractions(); 
+                    }
+                });
+            });
+            
+            function formatLabel(str, maxwidth){
+                let sections = [];
+                let words = str.split(" ");
+                let temp = "";
+
+                words.forEach((item, index) => {
+                    if(temp.length > 0) {
+                        temp += " " + item;
+                    } else {
+                        temp = item;
+                    }
+                    if(temp.length > maxwidth){
+                        sections.push(temp);
+                        temp = "";
+                    }
+                    if(index === words.length - 1 && temp.length > 0){
+                        sections.push(temp);
+                    }
+                });
+                return sections;
+            }
+            
+            const defaultChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { color: '#475569' } },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        callbacks: {
+                             label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y;
+                                }
+                                if (context.dataset.unit) {
+                                     label += context.dataset.unit;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        grid: { color: '#e2e8f0' },
+                        ticks: { color: '#475569' }
+                    },
+                    x: { 
+                        grid: { display: false },
+                        ticks: { 
+                            color: '#475569', 
+                            callback: function(value, index, values) {
+                                return formatLabel(this.getLabelForValue(value), 10); 
+                            }
+                        }
+                    }
+                }
+            };
+
+            function createAdvancedAnalyticsChart() {
+                const advancedAnalyticsCanvas = document.getElementById('advancedAnalyticsChart');
+                if (advancedAnalyticsCanvas && !Chart.getChart(advancedAnalyticsCanvas.id)) { 
+                     myAdvancedAnalyticsChart = new Chart(advancedAnalyticsCanvas, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Enrollment Trends', 'Completion Rates', 'User Engagement', 'Revenue (MoM)'],
+                            datasets: [{
+                                label: 'KPI Value (Illustrative)',
+                                data: [75, 60, 85, 45], 
+                                backgroundColor: ['#38bdf8', '#34d399', '#fbbf24', '#f87171'], 
+                                borderColor: ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444'],
+                                borderWidth: 1,
+                                unit: '%'
+                            }]
+                        },
+                        options: {...defaultChartOptions}
+                    });
+                }
+            }
+            
+            function initializeCharts() {
+                if (myBackendChart) myBackendChart.destroy();
+                if (myFrontendChart) myFrontendChart.destroy();
+                if (myDatabaseChart) myDatabaseChart.destroy();
+
+                const backendCanvas = document.getElementById('backendChart');
+                if (backendCanvas) {
+                    myBackendChart = new Chart(backendCanvas, { 
+                        type: 'bar',
+                        data: {
+                            labels: ['Scalability', 'Maintainability', 'Security', 'Real-time Cap.'],
+                            datasets: [{
+                                label: 'Node.js/Express.js Strength',
+                                data: [4.5, 4, 4, 4.5], 
+                                backgroundColor: '#38bdf8', 
+                                borderColor: '#0ea5e9', 
+                                borderWidth: 1
+                            }]
+                        },
+                        options: { ...defaultChartOptions, indexAxis: 'y', scales: { ...defaultChartOptions.scales, y: { ...defaultChartOptions.scales.y, ticks: { callback: function(value, index, values) { return this.getLabelForValue(value);}}}}}
+                    });
+                }
+
+                const frontendCanvas = document.getElementById('frontendChart');
+                if (frontendCanvas) {
+                    myFrontendChart = new Chart(frontendCanvas, { 
+                        type: 'bar',
+                        data: {
+                            labels: ['Interactivity', 'Reusability', 'Ecosystem', 'UI Scalability'],
+                            datasets: [{
+                                label: 'React Strength',
+                                data: [5, 4.5, 5, 4.5], 
+                                backgroundColor: '#34d399', 
+                                borderColor: '#10b981', 
+                                borderWidth: 1
+                            }]
+                        },
+                        options: { ...defaultChartOptions, indexAxis: 'y', scales: { ...defaultChartOptions.scales, y: { ...defaultChartOptions.scales.y, ticks: { callback: function(value, index, values) { return this.getLabelForValue(value);}}}}}
+                    });
+                }
+
+                const databaseCanvas = document.getElementById('databaseChart');
+                if (databaseCanvas) {
+                    myDatabaseChart = new Chart(databaseCanvas, { 
+                        type: 'bar',
+                        data: {
+                            labels: ['Data Integrity', 'Scalability', 'Security', 'JSONB Support'],
+                            datasets: [{
+                                label: 'PostgreSQL Strength',
+                                data: [5, 4, 4.5, 4.5], 
+                                backgroundColor: '#fbbf24', 
+                                borderColor: '#f59e0b', 
+                                borderWidth: 1
+                            }]
+                        },
+                        options: { ...defaultChartOptions, indexAxis: 'y', scales: { ...defaultChartOptions.scales, y: { ...defaultChartOptions.scales.y, ticks: { callback: function(value, index, values) { return this.getLabelForValue(value);}}}}}
+                    });
+                }
+            }
+
+            initializeCharts(); 
+            
+            searchInput.addEventListener('input', function() {
+                const query = searchInput.value.toLowerCase().trim();
+                let matchesFound = 0;
+
+                contentSections.forEach(section => {
+                    section.innerHTML = originalSectionContents[section.id];
+                    section.classList.remove('active'); 
+
+                    if (query === '') {
+                        resetSections();
+                        return; 
+                    }
+
+                    const sectionContent = section.textContent.toLowerCase();
+                    if (sectionContent.includes(query)) {
+                        matchesFound++;
+                        section.classList.add('active'); 
+
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = originalSectionContents[section.id];
+
+                        function highlightTextNodes(node) {
+                            if (node.nodeType === Node.TEXT_NODE) {
+                                const text = node.nodeValue;
+                                const lowerText = text.toLowerCase();
+                                const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'); 
+                                if (regex.test(text)) {
+                                    const fragment = document.createDocumentFragment();
+                                    let lastIndex = 0;
+                                    let match;
+                                    while ((match = regex.exec(text)) !== null) {
+                                        if (match.index > lastIndex) {
+                                            fragment.appendChild(document.createTextNode(text.substring(lastIndex, match.index)));
+                                        }
+                                        const span = document.createElement('span');
+                                        span.classList.add('highlight');
+                                        span.textContent = match[0];
+                                        fragment.appendChild(span);
+                                        lastIndex = regex.lastIndex;
+                                    }
+                                    if (lastIndex < text.length) {
+                                        fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
+                                    }
+                                    node.parentNode.replaceChild(fragment, node);
+                                }
+                            } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName !== 'SCRIPT' && node.tagName !== 'STYLE' && !node.classList.contains('chart-container')) {
+                                Array.from(node.childNodes).forEach(highlightTextNodes);
+                            }
+                        }
+                        highlightTextNodes(tempDiv);
+                        section.innerHTML = tempDiv.innerHTML;
+
+                        const accordionContent = section.querySelector('.accordion-content');
+                        if (accordionContent && accordionContent.textContent.toLowerCase().includes(query)) {
+                            const triggerButton = accordionContent.previousElementSibling;
+                            if (triggerButton && triggerButton.classList.contains('accordion-trigger')) {
+                                if (accordionContent.style.maxHeight === "0px" || !accordionContent.style.maxHeight) {
+                                    accordionContent.style.maxHeight = accordionContent.scrollHeight + "px";
+                                    accordionContent.style.opacity = "1"; 
+                                    const arrow = triggerButton.querySelector('.down-arrow');
+                                    if(arrow) {
+                                        arrow.textContent = '-';
+                                        arrow.classList.add('rotate-45');
+                                    }
+                                }
+                                const chartCanvas = accordionContent.querySelector('canvas');
+                                if (chartCanvas && chartCanvas.id === 'advancedAnalyticsChart' && !Chart.getChart(chartCanvas.id)) {
+                                    createAdvancedAnalyticsChart();
+                                }
+                            }
+                        }
+                    }
+                });
+
+                if (query === '') {
+                    searchResultsInfo.textContent = '';
+                } else if (matchesFound > 0) {
+                    searchResultsInfo.textContent = `${matchesFound} section(s) found.`;
+                } else {
+                    searchResultsInfo.textContent = 'No matching sections found.';
+                }
+
+                navLinks.forEach(link => {
+                    const targetId = link.dataset.target;
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) {
+                        link.classList.toggle('active', targetSection.classList.contains('active'));
+                    }
+                });
+            });
+
+            function setupAdvancedFeatureInteractions() {
+                const simulateNotificationBtn = document.getElementById('simulate-notification');
+                const notificationArea = document.getElementById('notification-area');
+                if (simulateNotificationBtn && !simulateNotificationBtn.dataset.listenerAttached) { 
+                    simulateNotificationBtn.addEventListener('click', () => {
+                        const notification = document.createElement('div');
+                        notification.className = 'absolute p-3 bg-blue-500 text-white rounded-lg shadow-xl notification-alert';
+                        notification.textContent = 'New enrollment! John Doe joined Course A.';
+                        notificationArea.appendChild(notification);
+
+                        notification.addEventListener('animationend', () => {
+                            notification.remove();
+                        });
+                    });
+                    simulateNotificationBtn.dataset.listenerAttached = 'true'; 
+                }
+
+                const runBulkActionBtn = document.getElementById('run-bulk-action');
+                const bulkActionStatus = document.getElementById('bulk-action-status');
+                if (runBulkActionBtn && !runBulkActionBtn.dataset.listenerAttached) { 
+                    runBulkActionBtn.addEventListener('click', () => {
+                        bulkActionStatus.textContent = 'Processing...';
+                        bulkActionStatus.classList.add('text-amber-500');
+                        setTimeout(() => {
+                            bulkActionStatus.textContent = 'Bulk action completed successfully!';
+                            bulkActionStatus.classList.remove('text-amber-500');
+                            bulkActionStatus.classList.add('text-emerald-500');
+                        }, 2000);
+                        setTimeout(() => {
+                            bulkActionStatus.textContent = '';
+                            bulkActionStatus.classList.remove('text-emerald-500');
+                        }, 4000);
+                    });
+                    runBulkActionBtn.dataset.listenerAttached = 'true'; 
+                }
+            }
+
+            setActiveSection(navLinks[0].dataset.target);
+        });
+    </script>
+</body>
+</html>
